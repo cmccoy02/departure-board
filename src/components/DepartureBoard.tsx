@@ -14,6 +14,7 @@ const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 const DepartureBoard: React.FC<DepartureBoardProps> = ({ metrics }) => {
     const boardRef = useRef<HTMLDivElement>(null);
+    const boardInstanceRef = useRef<FlipBoard | null>(null);
 
     const splitLabel = (label: string): [string, string?] => {
         const parts = label.split(' ');
@@ -23,15 +24,37 @@ const DepartureBoard: React.FC<DepartureBoardProps> = ({ metrics }) => {
     };
 
     useEffect(() => {
-        if (boardRef.current) {
-            const board = new FlipBoard(boardRef.current, { rowCount: metrics.length });
-            const displayValues = metrics.map(metric => {
-                const [line1, line2] = splitLabel(metric.label);
-                const padding = ' '.repeat(25 - (line2?.length || 0) - metric.value.length);
-                return `${line2 || line1}${padding}${metric.value}`;
+        if (boardRef.current && !boardInstanceRef.current) {
+            // Calculate the maximum width needed for any row
+            const maxWidth = Math.max(...metrics.map(metric => 
+                metric.label.length + metric.value.length + 2 // +2 for padding between label and value
+            ));
+            
+            // Only create the board if it doesn't exist
+            boardInstanceRef.current = new FlipBoard(boardRef.current, { 
+                rowCount: metrics.length,
+                letterCount: maxWidth
             });
-            board.setValue(displayValues);
+            
+            const displayValues = metrics.map(metric => {
+                const label = metric.label;
+                const padding = ' '.repeat(Math.max(0, maxWidth - label.length - metric.value.length - 1));
+                return `${label} ${padding}${metric.value}`;
+            });
+            
+            boardInstanceRef.current.setValue(displayValues);
         }
+
+        // Cleanup function
+        return () => {
+            if (boardInstanceRef.current) {
+                // Clear any existing content
+                if (boardRef.current) {
+                    boardRef.current.innerHTML = '';
+                }
+                boardInstanceRef.current = null;
+            }
+        };
     }, [metrics]);
 
     return (
@@ -51,7 +74,8 @@ class FlipBoard {
         this.rowCount = options.rowCount || 1;
         this.letterCount = options.letterCount || 25;
 
-        this.element.className += ' departure-board';
+        // Clear any existing content
+        this.element.innerHTML = '';
 
         for (let r = 0; r < this.rowCount; r++) {
             this.letters.push([]);
@@ -82,7 +106,7 @@ class FlipBoard {
             const rowValue = value[r] ? value[r].toUpperCase() : '';
             row.forEach((letter, i) => {
                 setTimeout(() => {
-                    const letterValue = rowValue.substr(i, 1) || '';
+                    const letterValue = rowValue.charAt(i) || ' ';
                     letter.setValue(letterValue);
                 }, 2000 * r + 25 * i + Math.random() * 400);
             });
