@@ -1,0 +1,57 @@
+.theme-switcher {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    justify-content: center;
+}
+
+.theme-button {
+    padding: 0.5rem 1rem;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+}
+
+.theme-button:hover {
+    background: #f0f0f0;
+}
+
+.theme-button.active {
+    background: #333;
+    color: white;
+    border-color: #333;
+}
+
+/* Theme-specific button styles */
+[data-theme="dark"] .theme-button {
+    background: #333;
+    color: white;
+    border-color: #444;
+}
+
+[data-theme="dark"] .theme-button:hover {
+    background: #444;
+}
+
+[data-theme="dark"] .theme-button.active {
+    background: #666;
+    border-color: #666;
+}
+
+[data-theme="forest"] .theme-button {
+    background: #011111;
+    color: #eee;
+    border-color: #042E30;
+}
+
+[data-theme="forest"] .theme-button:hover {
+    background: #042E30;
+}
+
+[data-theme="forest"] .theme-button.active {
+    background: #06494c;
+    border-color: #06494c;
+} 
